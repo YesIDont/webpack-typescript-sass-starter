@@ -12,7 +12,7 @@ module.exports = () => {
 
   if (isEnvDevelopment) console.log('Server runs in development mode.');
 
-  let settings = {
+  return {
     target: 'web',
     mode: isEnvProduction ? 'production' : 'development',
     devtool: isEnvDevelopment ? 'source-map' : false,
@@ -22,7 +22,7 @@ module.exports = () => {
       path: path.resolve(__dirname, 'dist'),
     },
     resolve: {
-      extensions: ['.ts', '.tsx', '.js', '.json', '.glsl'],
+      extensions: ['.ts', '.tsx', '.js', '.json'],
     },
     module: {
       rules: [
@@ -36,20 +36,10 @@ module.exports = () => {
           test: /\.ts$/,
           loader: 'babel-loader',
         },
+        // finds ts files and converts to vanilla js
         {
           test: /\.ts$/,
           loader: 'ts-loader',
-        },
-        {
-          test: /\.glsl$/,
-          use: {
-            loader: 'webpack-glsl-minify',
-            options: {
-              output: 'object',
-              preserveUniforms: true,
-              disableMangle: isEnvDevelopment,
-            },
-          },
         },
         { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
       ],
@@ -71,18 +61,4 @@ module.exports = () => {
       new ForkTsCheckerWebpackPlugin(),
     ],
   };
-
-  if (isEnvProduction) {
-    settings = {
-      ...settings,
-      plugins: [
-        ...settings.plugins,
-        new HTMLInlineCSSWebpackPlugin(),
-        new HtmlInlineScriptPlugin([/bundle.js$/]),
-        new ZipPlugin(),
-      ],
-    };
-  }
-
-  return settings;
 };
